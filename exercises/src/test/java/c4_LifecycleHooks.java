@@ -37,7 +37,7 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         CopyOnWriteArrayList<String> hooksTriggered = new CopyOnWriteArrayList<>();
 
         Flux<Integer> temperatureFlux = room_temperature_service()
-                //todo: change this line only
+                .doOnSubscribe(i -> hooksTriggered.add("subscribe"))
                 ;
 
         StepVerifier.create(temperatureFlux.take(5))
@@ -56,7 +56,7 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         CopyOnWriteArrayList<String> hooksTriggered = new CopyOnWriteArrayList<>();
 
         Flux<Integer> temperatureFlux = room_temperature_service()
-                //todo: change this line only
+                .doFirst(() -> hooksTriggered.add("before subscribe"))
                 ;
 
         StepVerifier.create(temperatureFlux.take(5).doOnSubscribe(s -> hooksTriggered.add("subscribe")))
@@ -75,7 +75,10 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         AtomicInteger counter = new AtomicInteger(0);
 
         Flux<Integer> temperatureFlux = room_temperature_service()
-                //todo: change this line only
+                .doOnNext(item -> {
+                    System.out.println(item);
+                    counter.set(counter.get() + 1);
+                })
                 ;
 
         StepVerifier.create(temperatureFlux)
@@ -94,7 +97,9 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         AtomicBoolean completed = new AtomicBoolean(false);
 
         Flux<Integer> temperatureFlux = room_temperature_service()
-                //todo: change this line only
+                .doOnComplete(() -> {
+                    completed.set(true);
+                })
                 ;
 
         StepVerifier.create(temperatureFlux.skip(20))
@@ -113,7 +118,7 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         AtomicBoolean canceled = new AtomicBoolean(false);
 
         Flux<Integer> temperatureFlux = room_temperature_service()
-                //todo: change this line only
+                .doOnCancel(() -> canceled.set(true))
                 ;
 
         StepVerifier.create(temperatureFlux.take(0))
@@ -133,7 +138,7 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         AtomicInteger hooksTriggeredCounter = new AtomicInteger(0);
 
         Flux<Integer> temperatureFlux = room_temperature_service()
-                //todo: change this line only
+                .doOnTerminate(() -> hooksTriggeredCounter.set(hooksTriggeredCounter.get() + 1));
                 ;
 
         StepVerifier.create(temperatureFlux.take(0))
@@ -161,7 +166,7 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         AtomicInteger hooksTriggeredCounter = new AtomicInteger(0);
 
         Flux<Integer> temperatureFlux = room_temperature_service()
-                //todo: change this line only
+                .doFinally(items -> hooksTriggeredCounter.set(hooksTriggeredCounter.get() + 1));
                 ;
 
         StepVerifier.create(temperatureFlux.take(0))
@@ -188,9 +193,9 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         CopyOnWriteArrayList<String> sideEffects = new CopyOnWriteArrayList<>();
 
         Mono<Boolean> just = Mono.just(true)
-                                 .doFirst(() -> sideEffects.add("three"))
-                                 .doFirst(() -> sideEffects.add("two"))
-                                 .doFirst(() -> sideEffects.add("one"));
+                                 .doFirst(() -> sideEffects.add("todo"))
+                                 .doFirst(() -> sideEffects.add("todo"))
+                                 .doFirst(() -> sideEffects.add("todo"));
 
         List<String> orderOfExecution =
                 Arrays.asList("todo", "todo", "todo"); //todo: change this line only
@@ -217,7 +222,14 @@ public class c4_LifecycleHooks extends LifecycleHooksBase {
         CopyOnWriteArrayList<String> signals = new CopyOnWriteArrayList<>();
 
         Flux<Integer> flux = Flux.just(1, 2, 3)
-                //todo: change this line only
+                .doOnEach(signal -> {
+                    if(signal.isOnNext()){
+                        signals.add("ON_NEXT");
+                    }
+                    else if(signal.isOnComplete()){
+                        signals.add("ON_COMPLETE");
+                    }
+                })
                 ;
 
         StepVerifier.create(flux)
